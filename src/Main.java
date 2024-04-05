@@ -1,13 +1,13 @@
-import Controllers.Game;
-import View.View;
+import Controllers.Jeu;
+import Vue.Vue;
 
 public class Main {
     public static void main(String[] args) {
 
-        Game game = new Game();
-        game.startGame();
+        Jeu jeu = new Jeu();
+        jeu.startGame();
 
-        View ex = new View(game);
+        Vue ex = new Vue(jeu);
         ex.setVisible(true);
 
     }

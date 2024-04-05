@@ -44,19 +44,19 @@ public class Bandit {
 
     public void seDeplacer(Direction direction){
         if(wagon.isLocomotive() && direction == Direction.AVANT) {
-            System.out.println("C'est impossible de se déplacer vers l'avant, la locomotive est déjà en tête de train");
+            System.out.println( nom + " est déjà dans la locomotive");
             return;
         }
         if(wagon.estDernierWagon() && direction == Direction.ARRIERE) {
-            System.out.println("C'est impossible de se déplacer vers l'arrière, le wagon est déjà en queue de train");
+            System.out.println(nom + " est déjà dans le dernier wagon");
             return;
         }
         if(position == Position.TOIT && direction == Direction.HAUT){
-            System.out.println("C'est impossible de se déplacer vers le haut, le bandit est déjà sur le toit");
+            System.out.println(nom +" est déjà sur le toit");
             return;
         }
         if(position == Position.INTERIEUR && direction == Direction.BAS){
-            System.out.println("C'est impossible de se déplacer vers le bas, le bandit est déjà à l'intérieur");
+            System.out.println(nom + " est déjà à l'intérieur");
             return;
         }
 
@@ -65,22 +65,24 @@ public class Bandit {
                 wagon.retirerBandit(this);
                 setWagon(wagon.getWagonSuivant());
                 wagon.ajouterBandit(this);
+                System.out.println( nom + " se déplace vers l'avant");
                 break;
             case ARRIERE:
                 wagon.retirerBandit(this);
                 setWagon(wagon.getWagonPrecedent());
                 wagon.ajouterBandit(this);
+                System.out.println( nom + " se déplace vers l'arrière");
                 break;
             case HAUT:
                 wagon.deplacerBanditToit(this);
+                System.out.println( nom + " grimpe sur le toit");
                 break;
             case BAS:
                 wagon.deplacerBanditInterieur(this);
+                System.out.println( nom + " descend à l'intérieur");
                 break;
         }
 
-
-        System.out.println( "Je me déplace vers " + direction);
     }
 
     public Color getCouleur() {
@@ -102,5 +104,9 @@ public class Bandit {
 
     public void setPosition(Position position) {
         this.position = position;
+    }
+
+    public Wagon getWagon() {
+        return wagon;
     }
 }
