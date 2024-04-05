@@ -9,7 +9,7 @@ import Models.Wagon;
 
 import java.awt.*;
 
-public class Game {
+public class Jeu {
 
 
     private Bandit joueurCourant;
@@ -21,20 +21,19 @@ public class Game {
 
 
         public void startGame() {
-            joueurCourant = new Bandit("Joe",Color.BLUE, Position.INTERIEUR);
-            train = new Train(5);
+            joueurCourant = new Bandit(NOM_BANDIT_1,Color.BLUE, Position.INTERIEUR);
+            train = new Train(NB_WAGONS);
 
-            // Populer le train
+
             for (Wagon wagon : train.getWagons()) {
                 Bandit bandit = new Bandit("Avrel",Color.RED, Position.TOIT);
                 bandit.setWagon(wagon);
-                //wagon.getBanditsInterieurs().add(bandit);
                 wagon.ajouterBandit(bandit);
                 wagon.ajouterButin(new Bijous());
                 wagon.ajouterButin(new Bourse(25));
             }
 
-            train.getWagons()[4].ajouterBandit(joueurCourant);
+            train.getWagons()[2].ajouterBandit(joueurCourant);
 
 
         }

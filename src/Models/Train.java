@@ -35,4 +35,12 @@ public class Train {
         }
         return null;
     }
+
+    public Wagon getLocomotive() {
+        return wagons[0];
+    }
+
+    public Wagon getDernierWagon() {
+        return wagons[wagons.length-1];
+    }
 }
