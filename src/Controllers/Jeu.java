@@ -15,13 +15,13 @@ public class Jeu {
     private Bandit joueurCourant;
     private Train train;
     public static final int NB_WAGONS = 4;
-    public static final String NOM_BANDIT_1 = "Joe Dalton";
+    public static final String NOM_BANDIT_1 = "Bandit 1";
 
     public static final int NB_ACTIONS = 3;
 
 
     public void startGame() {
-        joueurCourant = new Bandit(NOM_BANDIT_1, new Color(255,200,200), Position.TOIT);
+        joueurCourant = new Bandit(NOM_BANDIT_1, new Color(0, 0, 0), Position.TOIT);
         train = new Train(NB_WAGONS);
 
         for (Wagon wagon : train.getWagons()) {
@@ -29,7 +29,7 @@ public class Jeu {
             wagon.ajouterButin(new Bourse(25));
         }
 
-        train.getWagons()[0].ajouterBandit(new Bandit("Marshal",new Color(255,0,0), Position.INTERIEUR));
+        train.getWagons()[0].ajouterBandit(new Bandit("Marshal",new Color(255, 255, 255), Position.INTERIEUR));
         train.getWagons()[2].ajouterBandit(joueurCourant);
 
 

@@ -7,17 +7,21 @@ import Enums.Direction;
 import Models.Train;
 import Models.Wagon;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class Vue extends JFrame {
 
-
-    public static final Color BACKGROUND_COLOR = new Color(55, 35, 5);
-    public static final Color WAGON_COLOR = new Color(139, 69, 19);
-    private static final Color LOCOMOTIVE_COLOR = new Color(105, 105, 105);
+    private static final String BACKGROUND_IMAGE_PATH = "images/background.jpg";
+    private BufferedImage backgroundImage;
+    public static final Color WAGON_COLOR = new Color(0, 117, 238);
+    private static final Color LOCOMOTIVE_COLOR = new Color(0, 61, 173);
 
     private static final int WAGON_WIDTH = 150;
     private static final int WAGON_HEIGHT = 60;
@@ -31,12 +35,18 @@ public class Vue extends JFrame {
     public Vue(Jeu jeu) {
         this.train = jeu.getTrain();
         joueur = jeu.getJoueur();
+        try {
+            this.backgroundImage = ImageIO.read(new File(BACKGROUND_IMAGE_PATH));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         initUI();
     }
 
     private void initUI() {
-        setTitle("Train Display");
-        setSize(WAGON_WIDTH * train.getWagons().length + WAGON_SPACING * (train.getWagons().length + 2), 500);
+        setTitle("Colt Express");
+        setSize(775, 392);
+        setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -48,10 +58,12 @@ public class Vue extends JFrame {
                 g.setFont(boldFont);
 
                 super.paintComponent(g);
+                if (backgroundImage != null) {
+                    g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+                }
                 drawTrain(g);
             }
         };
-        panel.setBackground(BACKGROUND_COLOR);
 
         add(panel, BorderLayout.CENTER);
         add(createControlPanel(), BorderLayout.SOUTH);
@@ -79,10 +91,6 @@ public class Vue extends JFrame {
 
             drawBanditsAndButins(g, wagon, i * (WAGON_WIDTH + WAGON_SPACING) + WAGON_SPACING + TEXT_OFFSET, 100);
 
-            g.setColor(Color.BLACK);
-            int railY = 100 + WAGON_HEIGHT + wheelRadius;
-            g.fillRect(WAGON_SPACING, railY, WAGON_WIDTH * train.getWagons().length + WAGON_SPACING * (train.getWagons().length - 1), 5);
-
         }
     }
 
@@ -109,7 +117,7 @@ public class Vue extends JFrame {
         currentY = y + WAGON_HEIGHT + 30;
         for (Butin butin : wagon.getButins()) {
             g.setColor(butin.getCouleur());
-            g.drawString(String.valueOf(butin.getValeur()), x, currentY);
+            g.drawString("$ " + String.valueOf(butin.getValeur()), x, currentY);
             currentY += textHeight;
         }
     }
@@ -120,7 +128,7 @@ public class Vue extends JFrame {
 
         controlPanel.add(new JLabel());
 
-        JButton btnHaut = new JButton("HAUT");
+        JButton btnHaut = new JButton("⬆️");
         btnHaut.addActionListener(e -> {
             joueur.seDeplacer(Direction.HAUT);
             panel.repaint();
@@ -136,21 +144,21 @@ public class Vue extends JFrame {
         });
         controlPanel.add(btnTirer);
 
-        JButton btnArriere = new JButton("ARRIERE");
+        JButton btnArriere = new JButton("⬅️");
         btnArriere.addActionListener(e -> {
             joueur.seDeplacer(Direction.ARRIERE);
             panel.repaint();
         });
         controlPanel.add(btnArriere);
 
-        JButton btnBas = new JButton("BAS");
+        JButton btnBas = new JButton("⬇️");
         btnBas.addActionListener(e -> {
             joueur.seDeplacer(Direction.BAS);
             panel.repaint();
         });
         controlPanel.add(btnBas);
 
-        JButton btnAvant = new JButton("AVANT");
+        JButton btnAvant = new JButton("➡️");
         btnAvant.addActionListener(e -> {
             joueur.seDeplacer(Direction.AVANT);
             panel.repaint();
@@ -159,7 +167,7 @@ public class Vue extends JFrame {
 
         controlPanel.add(new JLabel()); // Add an empty label to align the buttons
 
-        JButton btnRecupererButin = new JButton("RECUPERER_BUTIN");
+        JButton btnRecupererButin = new JButton("RECUPERER");
         btnRecupererButin.addActionListener(e -> {
             // Code
         });

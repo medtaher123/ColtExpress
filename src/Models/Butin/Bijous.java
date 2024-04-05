@@ -5,6 +5,6 @@ import java.awt.*;
 public class Bijous extends Butin{
 
     public Bijous() {
-        super(500, Color.YELLOW);
+        super(500, Color.BLACK);
     }
 }

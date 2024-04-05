@@ -10,6 +10,6 @@ public class Bourse extends Butin{
       * @param val entre
       */
     public Bourse(int val) {
-        super(val, Color.GREEN);
+        super(val, Color.BLACK);
     }
 }
