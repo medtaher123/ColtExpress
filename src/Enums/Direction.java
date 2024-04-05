@@ -1,4 +1,4 @@
-package Models;
+package Enums;
 
 public enum Direction {
     AVANT,

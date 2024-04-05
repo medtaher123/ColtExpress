@@ -3,7 +3,7 @@ package View;
 import Controllers.Game;
 import Models.Bandit;
 import Models.Butin.Butin;
-import Models.Direction;
+import Enums.Direction;
 import Models.Train;
 import Models.Wagon;
 
@@ -76,21 +76,21 @@ public class View extends JFrame {
     }
 
     private void drawBanditsAndButins(Wagon wagon, JPanel wagonBody, JPanel wagonRoof) {
-
+        // Draw bandits inside the wagon
         for (Bandit bandit : wagon.getBanditsInterieurs()) {
             JLabel banditLabel = new JLabel(bandit.getNom());
             banditLabel.setForeground(bandit.getCouleur());
             wagonBody.add(banditLabel);
         }
 
-
+        // Draw bandits on the roof
         for (Bandit bandit : wagon.getBanditsToit()) {
             JLabel banditLabel = new JLabel(bandit.getNom());
             banditLabel.setForeground(bandit.getCouleur());
             wagonRoof.add(banditLabel);
         }
 
-
+        // Draw butins inside the wagon
         for (Butin butin : wagon.getButins()) {
             JLabel butinLabel = new JLabel(butin.getValeur() + "");
             butinLabel.setForeground(butin.getCouleur());

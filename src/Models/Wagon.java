@@ -1,11 +1,9 @@
 package Models;
 
 import Models.Butin.Butin;
-import Models.Butin.Magot;
-import Models.Position;
+import Enums.Position;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class Wagon {
@@ -43,8 +41,8 @@ public class Wagon {
     public boolean estDernierWagon() {
         return dernierWagon;
     }
-    public void setDernierWagon(boolean wagon) {
-        dernierWagon = wagon;
+    public void setDernierWagon(boolean estDernierWagon) {
+        dernierWagon = estDernierWagon;
     }
 
     public List<Butin> getButins() {
@@ -62,5 +60,46 @@ public class Wagon {
     public boolean isDernierWagon() {
         return dernierWagon;
     }
+    public void deplacerBanditInterieur(Bandit bandit){
+        banditsToit.remove(bandit);
+        banditsInterieurs.add(bandit);
+        bandit.setPosition(Position.INTERIEUR);
+    }
+    public void deplacerBanditToit(Bandit bandit){
+        banditsInterieurs.remove(bandit);
+        banditsToit.add(bandit);
+        bandit.setPosition(Position.TOIT);
+    }
 
+
+    public Wagon getWagonSuivant() {
+        return train.getWagonSuivant(index);
+    }
+    public Wagon getWagonPrecedent() {
+        return train.getWagonPrecedent(index);
+    }
+
+
+    public void retirerBandit(Bandit bandit, Position position) {
+        if(position == Position.INTERIEUR) {
+            banditsInterieurs.remove(bandit);
+        } else {
+            banditsToit.remove(bandit);
+        }
+    }
+    public void retirerBandit(Bandit bandit) {
+        retirerBandit(bandit, bandit.getPosition());
+    }
+
+    public void ajouterBandit(Bandit bandit) {
+        ajouterBandit(bandit, bandit.getPosition());
+    }
+    public void ajouterBandit(Bandit bandit, Position position) {
+        if(position == Position.INTERIEUR) {
+            banditsInterieurs.add(bandit);
+        } else {
+            banditsToit.add(bandit);
+        }
+        bandit.setWagon(this);
+    }
 }

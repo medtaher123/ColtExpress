@@ -1,7 +1,8 @@
 package Models;
 
+import Enums.Direction;
 import Models.Butin.Butin;
-import Models.Position;
+import Enums.Position;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -42,6 +43,43 @@ public class Bandit {
     }
 
     public void seDeplacer(Direction direction){
+        if(wagon.isLocomotive() && direction == Direction.AVANT) {
+            System.out.println("C'est impossible de se déplacer vers l'avant, la locomotive est déjà en tête de train");
+            return;
+        }
+        if(wagon.estDernierWagon() && direction == Direction.ARRIERE) {
+            System.out.println("C'est impossible de se déplacer vers l'arrière, le wagon est déjà en queue de train");
+            return;
+        }
+        if(position == Position.TOIT && direction == Direction.HAUT){
+            System.out.println("C'est impossible de se déplacer vers le haut, le bandit est déjà sur le toit");
+            return;
+        }
+        if(position == Position.INTERIEUR && direction == Direction.BAS){
+            System.out.println("C'est impossible de se déplacer vers le bas, le bandit est déjà à l'intérieur");
+            return;
+        }
+
+        switch (direction){
+            case AVANT:
+                wagon.retirerBandit(this);
+                setWagon(wagon.getWagonSuivant());
+                wagon.ajouterBandit(this);
+                break;
+            case ARRIERE:
+                wagon.retirerBandit(this);
+                setWagon(wagon.getWagonPrecedent());
+                wagon.ajouterBandit(this);
+                break;
+            case HAUT:
+                wagon.deplacerBanditToit(this);
+                break;
+            case BAS:
+                wagon.deplacerBanditInterieur(this);
+                break;
+        }
+
+
         System.out.println( "Je me déplace vers " + direction);
     }
 
