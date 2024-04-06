@@ -1,11 +1,13 @@
 package Vue;
 
 import Controllers.Jeu;
-import Models.Bandit;
+import Models.*;
+import Models.Actions.ActionCollecter;
+import Models.Actions.ActionDeplacement;
+import Models.Actions.ActionTirer;
 import Models.Butin.Butin;
 import Enums.Direction;
-import Models.Train;
-import Models.Wagon;
+import Models.Actions.Action;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -28,11 +30,13 @@ public class Vue extends JFrame {
     private static final int WAGON_SPACING = 30;
     private static final int TEXT_OFFSET = 5;
 
+    private Jeu jeu;
     private Train train;
     private Bandit joueur;
     private JPanel panel;
 
     public Vue(Jeu jeu) {
+        this.jeu = jeu;
         this.train = jeu.getTrain();
         joueur = jeu.getJoueur();
         try {
@@ -62,6 +66,7 @@ public class Vue extends JFrame {
                     g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
                 }
                 drawTrain(g);
+                drawScore(g);
             }
         };
 
@@ -99,17 +104,23 @@ public class Vue extends JFrame {
 
         // Bandits Interieurs
         int currentY = y + 15;
-        for (Bandit bandit : wagon.getBanditsInterieurs()) {
-            g.setColor(bandit.getCouleur());
-            g.drawString(bandit.getNom(), x, currentY);
+        Marshall marshall = wagon.getMarshall();
+        if (marshall != null) {
+            g.setColor(marshall.getCouleur());
+            g.drawString(marshall.getNom(), x, currentY);
+            currentY += textHeight;
+        }
+        for (Personne personne : wagon.getBanditsInterieurs()) {
+            g.setColor(personne.getCouleur());
+            g.drawString(personne.getNom(), x, currentY);
             currentY += textHeight;
         }
 
-        // bandits Toit
+        // bandits Toit et Marshall
         currentY = y - 5;
-        for (Bandit bandit : wagon.getBanditsToit()) {
-            g.setColor(bandit.getCouleur());
-            g.drawString(bandit.getNom(), x, currentY);
+        for (Personne personne : wagon.getBanditsToit()) {
+            g.setColor(personne.getCouleur());
+            g.drawString(personne.getNom(), x, currentY);
             currentY -= textHeight;
         }
 
@@ -117,7 +128,7 @@ public class Vue extends JFrame {
         currentY = y + WAGON_HEIGHT + 30;
         for (Butin butin : wagon.getButins()) {
             g.setColor(butin.getCouleur());
-            g.drawString("$ " + String.valueOf(butin.getValeur()), x, currentY);
+            g.drawString( butin.getNom() , x, currentY);
             currentY += textHeight;
         }
     }
@@ -128,52 +139,46 @@ public class Vue extends JFrame {
 
         controlPanel.add(new JLabel());
 
-        JButton btnHaut = new JButton("⬆️");
-        btnHaut.addActionListener(e -> {
-            joueur.seDeplacer(Direction.HAUT);
-            panel.repaint();
-        });
+
+        JButton btnHaut = creerJButton(new ActionDeplacement(joueur, Direction.HAUT));
         controlPanel.add(btnHaut);
 
         controlPanel.add(new JLabel());
         controlPanel.add(new JLabel());
 
-        JButton btnTirer = new JButton("TIRER");
-        btnTirer.addActionListener(e -> {
-            // Code
-        });
+        JButton btnTirer = creerJButton(new ActionTirer(joueur));
         controlPanel.add(btnTirer);
 
-        JButton btnArriere = new JButton("⬅️");
-        btnArriere.addActionListener(e -> {
-            joueur.seDeplacer(Direction.ARRIERE);
-            panel.repaint();
-        });
+        JButton btnArriere = creerJButton(new ActionDeplacement(joueur, Direction.ARRIERE));
         controlPanel.add(btnArriere);
 
-        JButton btnBas = new JButton("⬇️");
-        btnBas.addActionListener(e -> {
-            joueur.seDeplacer(Direction.BAS);
-            panel.repaint();
-        });
+        JButton btnBas = creerJButton(new ActionDeplacement(joueur, Direction.BAS));
         controlPanel.add(btnBas);
 
-        JButton btnAvant = new JButton("➡️");
-        btnAvant.addActionListener(e -> {
-            joueur.seDeplacer(Direction.AVANT);
-            panel.repaint();
-        });
+        JButton btnAvant = creerJButton(new ActionDeplacement(joueur, Direction.AVANT));
         controlPanel.add(btnAvant);
 
-        controlPanel.add(new JLabel()); // Add an empty label to align the buttons
+        controlPanel.add(new JLabel());
 
-        JButton btnRecupererButin = new JButton("RECUPERER");
-        btnRecupererButin.addActionListener(e -> {
-            // Code
-        });
-        controlPanel.add(btnRecupererButin);
+
+        JButton btnRecuperer = creerJButton(new ActionCollecter(joueur));
+        controlPanel.add(btnRecuperer);
 
         return controlPanel;
+    }
+
+    public JButton creerJButton(Action action){
+        JButton btn = new JButton(action.toString());
+        btn.addActionListener(e -> {
+            if(!action.peutExecuter()){
+                return;
+            }
+            action.executer();
+            panel.repaint();
+            jeu.tourSuivant();
+            panel.repaint();
+        });
+        return btn;
     }
 
     private void setupKeyboardListeners() {
@@ -203,5 +208,15 @@ public class Vue extends JFrame {
                 panel.repaint();
             }
         });
+    }
+
+    private void drawScore(Graphics g) {
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 14));
+        int y = 30;
+        for (Bandit bandit : jeu.getBandits()) {
+            g.drawString(bandit.getNom() + ": " + bandit.getScore(), 10, y);
+            y += 20;
+        }
     }
 }

@@ -12,11 +12,12 @@ public class Wagon {
 
     private boolean locomotive;
     private boolean dernierWagon;
-    private int index;
+    private final int index;
 
-    private List<Butin> butins = new ArrayList<Butin>();
-    private List<Bandit> banditsInterieurs = new ArrayList<Bandit>();
-    private List<Bandit> banditsToit = new ArrayList<Bandit>();
+    private Marshall marshall=null;
+    private final List<Butin> butins = new ArrayList<Butin>();
+    private final List<Bandit> banditsInterieurs = new ArrayList<Bandit>();
+    private final List<Bandit> banditsToit = new ArrayList<Bandit>();
 
     public Wagon(Train train, int index) {
         this(train, index, false);
@@ -47,14 +48,6 @@ public class Wagon {
 
     public List<Butin> getButins() {
         return butins;
-    }
-
-    public List<Bandit> getBanditsInterieurs() {
-        return banditsInterieurs;
-    }
-
-    public List<Bandit> getBanditsToit() {
-        return banditsToit;
     }
 
     public boolean isDernierWagon() {
@@ -100,6 +93,36 @@ public class Wagon {
         } else {
             banditsToit.add(bandit);
         }
+        bandit.setPosition(position);
         bandit.setWagon(this);
+    }
+
+    public void setMarshall(Marshall marshall) {
+        this.marshall = marshall;
+        marshall.setWagon(this);
+    }
+    public Marshall getMarshall() {
+        return marshall;
+    }
+    public void retirerMarshall() {
+        marshall = null;
+    }
+    public void collecterButin(Bandit bandit) {
+        if(butins.isEmpty()) {
+            System.out.println("Il n'y a plus de butin à collecter");
+            return;
+        }
+
+        // collecter un element au hazard dans le wagon
+        Butin butin = butins.get((int) (Math.random() * butins.size()));
+        butins.remove(butin);
+        bandit.ajouterButin(butin);
+    }
+
+    public Bandit[] getBanditsInterieurs() {
+        return banditsInterieurs.toArray(new Bandit[0]);
+    }
+    public Bandit[] getBanditsToit() {
+        return banditsToit.toArray(new Bandit[0]);
     }
 }

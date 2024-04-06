@@ -6,20 +6,19 @@ import Enums.Position;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class Bandit {
+public class Bandit extends Personne{
 
-    Wagon wagon;
+
     private List<Butin> butins = new ArrayList<Butin>();
-    private Color couleur;
-    private Position position;
 
-    private String nom = "Joe Dalton";
+
+
+
     public Bandit(String nom, Color couleur, Position position){
-        this.nom = nom;
-        this.couleur = couleur;
-        this.position = position;
+        super(nom, couleur, position);
     }
 
     public void ajouterButin(Butin butin){
@@ -28,9 +27,7 @@ public class Bandit {
     public void retirerButin(Butin butin){
         butins.remove(butin);
     }
-    public void setWagon(Wagon wagon){
-        this.wagon = wagon;
-    }
+
     public void deposerButin(Butin butin){
         wagon.ajouterButin(butin);
         retirerButin(butin);
@@ -40,6 +37,11 @@ public class Bandit {
             wagon.ajouterButin(butin);
         }
         butins.clear();
+    }
+
+
+    public int getScore() {
+        return butins.stream().mapToInt(Butin::getValeur).sum();
     }
 
     public void seDeplacer(Direction direction){
@@ -85,28 +87,14 @@ public class Bandit {
 
     }
 
-    public Color getCouleur() {
-        return couleur;
-    }
+    public void seFaitTirerDessus() {
+        // deposer un butin au hazard
+        if(!butins.isEmpty()) {
+            Butin butin = butins.get((int) (Math.random() * butins.size()));
+            deposerButin(butin);
+        }
+        seDeplacer(Direction.HAUT);
 
-    public String getNom() {
-        return nom;
-    }
 
-
-    public void setNom(String a) {
-        this.nom = a;
-    }
-
-    public Position getPosition() {
-        return position;
-    }
-
-    public void setPosition(Position position) {
-        this.position = position;
-    }
-
-    public Wagon getWagon() {
-        return wagon;
     }
 }

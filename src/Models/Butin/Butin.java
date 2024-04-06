@@ -6,9 +6,11 @@ public abstract class Butin {
 
     protected int valeur;
 
+    protected String nom;
     private Color couleur;
-    public Butin(int val, Color couleur){
-        valeur = val;
+    public Butin(int valeur, String nom, Color couleur){
+        this.valeur = valeur;
+        this.nom = nom;
         this.couleur = couleur;
     }
 
@@ -18,6 +20,10 @@ public abstract class Butin {
 
     public Color getCouleur() {
         return couleur;
+    }
+
+    public String getNom() {
+        return nom;
     }
 
 }
