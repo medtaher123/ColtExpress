@@ -11,7 +11,7 @@ public class ActionCollecter extends Action {
     }
 
     @Override
-    public void executer() {
+    public void executerAction() {
         if (!peutExecuter()) {
             return;
         }

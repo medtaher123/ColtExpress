@@ -4,7 +4,7 @@ import Enums.Direction;
 import Enums.Position;
 import Models.Bandit;
 
-public class ActionDeplacement extends Action{
+public class ActionDeplacement extends Action {
 
 
     private Direction direction;
@@ -13,7 +13,7 @@ public class ActionDeplacement extends Action{
         this.direction = direction;
     }
 
-    public void executer(){
+    public void executerAction(){
         if(!peutExecuter()){
             return;
         }

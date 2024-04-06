@@ -2,12 +2,14 @@ package Vue;
 
 import Controllers.Jeu;
 import Models.*;
-import Models.Actions.ActionCollecter;
-import Models.Actions.ActionDeplacement;
-import Models.Actions.ActionTirer;
+import Models.Actions.*;
+import Models.Actions.Action;
 import Models.Butin.Butin;
 import Enums.Direction;
-import Models.Actions.Action;
+import Vue.Buttons.Button;
+import Vue.Buttons.ButtonAction;
+import Vue.Buttons.ButtonActionBandit;
+import Vue.Buttons.ButtonSupprimer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,8 +19,10 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 
-public class Vue extends JFrame {
+public class Vue extends JFrame implements Observer {
 
     private static final String BACKGROUND_IMAGE_PATH = "images/background.jpg";
     private BufferedImage backgroundImage;
@@ -35,9 +39,22 @@ public class Vue extends JFrame {
     private Bandit joueur;
     private JPanel panel;
 
+    private boolean buttonsEnabled = true;
+
+    private ButtonActionBandit btnHaut;
+    private ButtonActionBandit btnTirer;
+    private ButtonActionBandit btnArriere;
+    private ButtonActionBandit btnBas;
+    private ButtonActionBandit btnAvant;
+    private ButtonActionBandit btnRecuperer;
+    private ButtonSupprimer btnSupprimer;
+    private ButtonAction btnAction;
+    private Button[] buttons;
+
     public Vue(Jeu jeu) {
         this.jeu = jeu;
         this.train = jeu.getTrain();
+        jeu.addObserver(this);
         joueur = jeu.getJoueur();
         try {
             this.backgroundImage = ImageIO.read(new File(BACKGROUND_IMAGE_PATH));
@@ -49,7 +66,7 @@ public class Vue extends JFrame {
 
     private void initUI() {
         setTitle("Colt Express");
-        setSize(775, 392);
+        setSize((WAGON_WIDTH + WAGON_SPACING) * train.getWagons().length + WAGON_SPACING * 2, 392);
         setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -67,14 +84,48 @@ public class Vue extends JFrame {
                 }
                 drawTrain(g);
                 drawScore(g);
+                drawActions(g);
             }
         };
 
         add(panel, BorderLayout.CENTER);
-        add(createControlPanel(), BorderLayout.SOUTH);
+        add(creerPanneauDeControle(), BorderLayout.SOUTH);
+
 
         setupKeyboardListeners();
         this.setFocusable(true);
+    }
+
+    private void drawActions(Graphics g) {
+        int y = getHeight() - 100;
+        int x = 10;
+        int spacing = 30;
+
+        Font originalFont = g.getFont();
+        Font newFont = new Font("Arial Unicode MS", Font.BOLD, 14); // Change "Arial Unicode MS" to the name of a font that supports the characters
+
+        g.drawString("Actions: ", x, y);
+        x += 70;
+        g.setFont(newFont);
+        for (ActionAvecEtat action : jeu.getActions()) {
+
+            switch (action.getEtat()) {
+                case EN_ATTENTE:
+                    g.setColor(Color.BLACK);
+                    break;
+                case EXECUTEE:
+                    g.setColor(Color.GREEN);
+                    break;
+                case ECHOUEE:
+                    g.setColor(Color.RED);
+                    break;
+            }
+
+            g.drawString(action.toString(), x, y);
+            x += spacing + g.getFontMetrics().stringWidth(action.toString());
+        }
+
+        g.setFont(originalFont); // Reset to the original font
     }
 
     private void drawTrain(Graphics g) {
@@ -133,36 +184,37 @@ public class Vue extends JFrame {
         }
     }
 
-    private JPanel createControlPanel() {
+
+    private JPanel creerPanneauDeControle() {
+
+        btnHaut = new ButtonActionBandit(new ActionDeplacement(joueur, Direction.HAUT),this);
+        btnTirer = new ButtonActionBandit(new ActionTirer(joueur),this);
+        btnArriere = new ButtonActionBandit(new ActionDeplacement(joueur, Direction.ARRIERE),this);
+        btnBas = new ButtonActionBandit(new ActionDeplacement(joueur, Direction.BAS),  this);
+        btnAvant = new ButtonActionBandit(new ActionDeplacement(joueur, Direction.AVANT), this);
+        btnRecuperer = new ButtonActionBandit(new ActionCollecter(joueur), this);
+        btnSupprimer = new ButtonSupprimer(this);
+        btnAction = new ButtonAction(this);
+
+        buttons = new Button[]{btnHaut, btnTirer, btnArriere, btnBas, btnAvant, btnRecuperer, btnSupprimer, btnAction};
+
         JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new GridLayout(2, 5));
+        controlPanel.setLayout(new GridLayout(2, 6));
+
 
         controlPanel.add(new JLabel());
-
-
-        JButton btnHaut = creerJButton(new ActionDeplacement(joueur, Direction.HAUT));
-        controlPanel.add(btnHaut);
-
+        controlPanel.add(btnHaut.getJButton());
         controlPanel.add(new JLabel());
         controlPanel.add(new JLabel());
+        controlPanel.add(btnTirer.getJButton());
+        controlPanel.add(btnSupprimer.getJButton());
 
-        JButton btnTirer = creerJButton(new ActionTirer(joueur));
-        controlPanel.add(btnTirer);
-
-        JButton btnArriere = creerJButton(new ActionDeplacement(joueur, Direction.ARRIERE));
-        controlPanel.add(btnArriere);
-
-        JButton btnBas = creerJButton(new ActionDeplacement(joueur, Direction.BAS));
-        controlPanel.add(btnBas);
-
-        JButton btnAvant = creerJButton(new ActionDeplacement(joueur, Direction.AVANT));
-        controlPanel.add(btnAvant);
-
+        controlPanel.add(btnArriere.getJButton());
+        controlPanel.add(btnBas.getJButton());
+        controlPanel.add(btnAvant.getJButton());
         controlPanel.add(new JLabel());
-
-
-        JButton btnRecuperer = creerJButton(new ActionCollecter(joueur));
-        controlPanel.add(btnRecuperer);
+        controlPanel.add(btnRecuperer.getJButton());
+        controlPanel.add(btnAction.getJButton());
 
         return controlPanel;
     }
@@ -181,6 +233,20 @@ public class Vue extends JFrame {
         return btn;
     }
 
+    private void refreshButtons() {
+        for (Button button : buttons) {
+            button.setEnabled(buttonsEnabled);
+        }
+    }
+
+    public void setButtonsEnabled(boolean enabled) {
+        buttonsEnabled = enabled;
+        refreshButtons();
+    }
+    public void setButtonsEnabled(boolean enabled, Action action) {
+        buttonsEnabled = enabled;
+        refreshButtons();
+    }
     private void setupKeyboardListeners() {
         this.addKeyListener(new KeyAdapter() {
             @Override
@@ -210,6 +276,7 @@ public class Vue extends JFrame {
         });
     }
 
+
     private void drawScore(Graphics g) {
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 14));
@@ -218,5 +285,24 @@ public class Vue extends JFrame {
             g.drawString(bandit.getNom() + ": " + bandit.getScore(), 10, y);
             y += 20;
         }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        System.out.println("Vue.update");
+        panel.paintImmediately(panel.getBounds());
+        if( o instanceof Button) {
+            buttonsEnabled = false;
+            //refreshButtons();
+            //panel.repaint();
+        }
+
+
+
+
+    }
+
+    public Jeu getJeu() {
+        return jeu;
     }
 }

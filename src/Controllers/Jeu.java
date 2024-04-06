@@ -1,24 +1,34 @@
 package Controllers;
 
+import Enums.PhaseDeJeu;
 import Enums.Position;
 import Models.*;
+import Models.Actions.Action;
+import Models.Actions.ActionAvecEtat;
 import Models.Butin.Bijous;
 import Models.Butin.Bourse;
 import Models.Butin.Butin;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
 
-public class Jeu {
+public class Jeu extends Observable {
 
+    public static final String NOM_BANDIT_1 = "Bandit 1";
+    public static final int NB_ACTIONS = 3;
 
     private Bandit[] bandits = new Bandit[1];
     private Bandit joueurCourant;
     private Train train;
     private Marshall marshall;
-    public static final int NB_WAGONS = 4;
-    public static final String NOM_BANDIT_1 = "Bandit 1";
+    public static final int NB_WAGONS = 5;
+    public List<ActionAvecEtat> actions = new ArrayList<>(NB_ACTIONS);
 
-    public static final int NB_ACTIONS = 3;
+    private PhaseDeJeu phaseDeJeu = PhaseDeJeu.PLANIFICATION;
+
+
 
     public void tourSuivant() {
         marshall.effectuerAction();
@@ -69,5 +79,51 @@ public class Jeu {
 
     public Bandit[] getBandits() {
         return bandits;
+    }
+
+
+    public void addAction(Action action) {
+        if(actions.size() < NB_ACTIONS) {
+            actions.add(new ActionAvecEtat(action));
+        }
+    }
+    public boolean peutAjouterAction() {
+        return actions.size() < NB_ACTIONS;
+    }
+    public void popAction() {
+        actions.removeLast();
+    }
+    public List<ActionAvecEtat> getActions() {
+        return actions;
+    }
+    public void clearActions() {
+        actions.clear();
+    }
+
+    public void executerActions() {
+        for (ActionAvecEtat action : actions) {
+            action.executer();
+            setChanged();
+            notifyObservers();
+
+            attendre(1000);
+
+
+        }
+        attendre(1000);
+        actions.clear();
+    }
+
+
+    private void attendre(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean peutExecuterActions() {
+        return actions.size() == NB_ACTIONS;
     }
 }

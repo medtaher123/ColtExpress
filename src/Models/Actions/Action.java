@@ -10,7 +10,15 @@ public abstract class Action {
         this.bandit = bandit;
     }
 
-    public abstract void executer();
+    public boolean executer(){
+        if(peutExecuter()){
+            executerAction();
+            return true;
+        }
+        return false;
+    }
+
+    protected abstract void executerAction();
 
     public abstract boolean peutExecuter();
 

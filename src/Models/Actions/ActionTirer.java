@@ -2,13 +2,13 @@ package Models.Actions;
 
 import Models.Bandit;
 
-public class ActionTirer extends Action{
+public class ActionTirer extends Action {
 
     public ActionTirer(Bandit bandit){
         super(bandit);
     }
     @Override
-    public void executer() {
+    public void executerAction() {
         System.out.println(bandit.getNom() + " tire!");
     }
 
