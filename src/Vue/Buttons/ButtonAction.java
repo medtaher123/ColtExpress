@@ -16,6 +16,6 @@ public class ButtonAction extends Button{
 
     @Override
     public boolean peutExecuter() {
-        return jeu.peutExecuterActions();
+        return jeu.getJoueur().actionsRemplies();
     }
 }

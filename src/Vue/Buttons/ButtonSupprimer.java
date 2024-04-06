@@ -9,11 +9,11 @@ public class ButtonSupprimer extends Button{
 
     @Override
     public void effectuerAction() {
-        jeu.popAction();
+        jeu.getJoueur().popAction();
     }
 
     @Override
     public boolean peutExecuter() {
-        return !jeu.getActions().isEmpty();
+        return !jeu.getJoueur().getActions().isEmpty();
     }
 }

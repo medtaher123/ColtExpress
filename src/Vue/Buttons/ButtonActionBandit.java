@@ -16,12 +16,12 @@ public class ButtonActionBandit extends Button{
 
     public void effectuerAction() {
         //action.executer();
-        jeu.addAction(action);
+        jeu.getJoueur().addAction(action);
     }
 
     @Override
     public boolean peutExecuter() {
-        return jeu.peutAjouterAction(); // && action.peutExecuter()
+        return jeu.getJoueur().peutAjouterAction(); // && action.peutExecuter()
     }
 
 

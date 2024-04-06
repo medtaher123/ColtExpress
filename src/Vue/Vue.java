@@ -1,6 +1,7 @@
 package Vue;
 
 import Controllers.Jeu;
+import Controllers.Joueur;
 import Models.*;
 import Models.Actions.*;
 import Models.Actions.Action;
@@ -107,7 +108,7 @@ public class Vue extends JFrame implements Observer {
         g.drawString("Actions: ", x, y);
         x += 70;
         g.setFont(newFont);
-        for (ActionAvecEtat action : jeu.getActions()) {
+        for (ActionAvecEtat action : jeu.getJoueur().getActions()) {
 
             switch (action.getEtat()) {
                 case EN_ATTENTE:
@@ -281,10 +282,22 @@ public class Vue extends JFrame implements Observer {
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 14));
         int y = 30;
-        for (Bandit bandit : jeu.getBandits()) {
-            g.drawString(bandit.getNom() + ": " + bandit.getScore(), 10, y);
+        for (Joueur joueur : jeu.getJoueurs()) {
+            g.drawString(joueur.getNom() + ": " + joueur.getScore(), 10, y);
             y += 20;
         }
+
+
+        // Ajouter le nom du joueur courant et la phase du jeu en haut à droite
+        String joueurCourant = "Joueur courant: " + jeu.getJoueur().getNom();
+        String phaseDuJeu = "Phase: " + jeu.getPhaseDeJeu().toString();
+
+        // Calculer les positions x pour que le texte soit aligné à droite
+        int xPhaseDuJeu = this.getWidth() - g.getFontMetrics().stringWidth(phaseDuJeu) - 50;
+        int xJoueurCourant = this.getWidth() - g.getFontMetrics().stringWidth(joueurCourant) - 50;
+        
+        g.drawString(phaseDuJeu, xPhaseDuJeu, 30);
+        g.drawString(joueurCourant, xJoueurCourant, 50);
     }
 
     @Override
@@ -292,7 +305,7 @@ public class Vue extends JFrame implements Observer {
         System.out.println("Vue.update");
         panel.paintImmediately(panel.getBounds());
         if( o instanceof Button) {
-            buttonsEnabled = false;
+            refreshButtons();
             //refreshButtons();
             //panel.repaint();
         }
