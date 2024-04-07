@@ -18,7 +18,7 @@ public class DeplacementBanditTest {
     public void setUp() {
         jeu = new Jeu();
         jeu.startGame();
-        bandit = jeu.getJoueur();
+        bandit = jeu.getJoueurCourant();
     }
 
     @Test

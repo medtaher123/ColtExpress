@@ -2,13 +2,16 @@ package Models.Actions;
 
 
 import Enums.EtatAction;
+import Models.Bandit;
 
 public class ActionAvecEtat {
     private Action action;
     private EtatAction etat = EtatAction.EN_ATTENTE;
 
-    public ActionAvecEtat(Action action) {
+    private Bandit bandit;
+    public ActionAvecEtat(Action action, Bandit bandit) {
         this.action = action;
+        this.bandit = bandit;
     }
 
     public Action getAction() {
@@ -23,7 +26,7 @@ public class ActionAvecEtat {
     }
 
     public void executer() {
-        if(action.executer()){
+        if(action.executer(bandit)){
             etat = EtatAction.EXECUTEE;
         }else {
             etat = EtatAction.ECHOUEE;

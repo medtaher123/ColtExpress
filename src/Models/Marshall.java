@@ -42,7 +42,7 @@ public class Marshall extends Personne{
 
         for(Bandit bandit : wagon.getBanditsInterieurs()){
             System.out.println("Le Marshall tire sur " + bandit.getNom());
-            bandit.seFaitTirerDessus();
+            bandit.seFaitTirerDessus(this);
         }
     }
 

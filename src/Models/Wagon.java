@@ -11,7 +11,6 @@ public class Wagon {
     private final Train train;
 
     private boolean locomotive;
-    private boolean dernierWagon;
     private final int index;
 
     private Marshall marshall=null;
@@ -40,19 +39,13 @@ public class Wagon {
     }
 
     public boolean estDernierWagon() {
-        return dernierWagon;
-    }
-    public void setDernierWagon(boolean estDernierWagon) {
-        dernierWagon = estDernierWagon;
+        return index == train.getWagons().length - 1;
     }
 
     public List<Butin> getButins() {
         return butins;
     }
 
-    public boolean isDernierWagon() {
-        return dernierWagon;
-    }
     public void deplacerBanditInterieur(Bandit bandit){
         banditsToit.remove(bandit);
         banditsInterieurs.add(bandit);

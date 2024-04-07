@@ -1,24 +1,52 @@
 package Models.Actions;
 
+import Enums.Direction;
 import Models.Bandit;
 
-public class ActionTirer extends Action {
+public abstract class ActionTirer extends Action {
 
-    public ActionTirer(Bandit bandit){
-        super(bandit);
-    }
-    @Override
-    public void executerAction() {
-        System.out.println(bandit.getNom() + " tire!");
+    private Direction direction;
+
+    public ActionTirer(Direction direction) {
+        this.direction = direction;
     }
 
-    @Override
-    public boolean peutExecuter() {
+    /**
+     * Chisi un bandit aléatoire parmi les bandits sauf le bandit courant
+     * @param bandits
+     * @param bandit
+     * @return
+     */
+    protected Bandit choisirBandit(Bandit[] bandits, Bandit bandit) {
+        if (bandits.length == 0 || (bandits.length == 1 && bandits[0] == bandit)) {
+            return null;
+        }
+        Bandit banditChoisi = bandits[(int) (Math.random() * bandits.length)];
+        while (banditChoisi == bandit) {
+            banditChoisi = bandits[(int) (Math.random() * bandits.length)];
+        }
+        return banditChoisi;
+    }
+
+    protected boolean executerAction(Bandit bandit) {
+        if (tirer(bandit)) {
+            bandit.setNbBalles(bandit.getNbBalles() - 1);
+            return true;
+        }
         return false;
     }
 
+    protected abstract boolean tirer(Bandit bandit);
+
     @Override
-    public String toString() {
-        return "Tirer";
+    public boolean peutExecuter(Bandit bandit) {
+        if(bandit.getNbBalles() == 0){
+            System.out.println(bandit.getNom() + " n'a plus de balles");
+            return false;
+        }
+        return true;
+
     }
+
+
 }

@@ -3,78 +3,93 @@ package Controllers;
 import Enums.PhaseDeJeu;
 import Enums.Position;
 import Models.*;
-import Models.Actions.ActionAvecEtat;
 import Models.Butin.Bijous;
 import Models.Butin.Bourse;
 import Models.Butin.Butin;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 public class Jeu extends Observable {
 
+    public static final float VITESSE = 2;
     public static final String NOM_BANDIT_1 = "Bandit 1";
-    public static final int NB_ACTIONS = 3;
+    public static final int NB_ACTIONS = 5;
 
-    private Joueur[] joueurs = new Joueur[1];
-    private Joueur joueurCourant;
+    private List<Joueur> joueurs = new ArrayList<>();
+    private int indexJoueurCourant = 0;
     private Train train;
     private Marshall marshall;
     public static final int NB_WAGONS = 5;
 
+    private int indexAction = 0;
 
     private PhaseDeJeu phaseDeJeu = PhaseDeJeu.PLANIFICATION;
 
 
 
-    public void tourSuivant() {
-        marshall.effectuerAction();
-    }
-
-
     public void startGame() {
-        joueurCourant = new Joueur(NOM_BANDIT_1, new Color(0, 0, 0), Position.TOIT);
-        joueurs[0] = joueurCourant;
         train = new Train(NB_WAGONS);
 
-        initButins();
-
+        ajouterJoueur(NOM_BANDIT_1, new Color(13, 13, 104), Position.TOIT,3);
+        ajouterJoueur("Bandit 2", new Color(255, 0, 0), Position.INTERIEUR,4);
 
         marshall = new Marshall();
         train.getWagons()[0].setMarshall(marshall);
-        train.getWagons()[2].ajouterBandit(joueurCourant);
 
 
     }
 
-    private void initButins() {
-        for (Wagon wagon : train.getWagons()) {
-            int nbButins = (int) (Math.random() * 4) + 1;
-            for (int i = 0; i < nbButins; i++) {
-                Butin butin;
-                if (Math.random() < 0.5) {
-                    butin = new Bijous();
-                } else {
-                    butin = new Bourse();
-                }
-                wagon.ajouterButin(butin);
+
+    public void tourSuivant() {
+
+        // rend le joueur suivant dans le tableau de joueurs le joueur courant
+        if(phaseDeJeu == PhaseDeJeu.PLANIFICATION) {
+            if (indexJoueurCourant != joueurs.size() - 1) {
+                setJoueurCourant(indexJoueurCourant + 1);
+                return;
             }
+            setJoueurCourant(0);
+            phaseDeJeu = PhaseDeJeu.EXECUTION;
         }
+
+        if(phaseDeJeu == PhaseDeJeu.EXECUTION) {
+            executerActions();
+            phaseDeJeu = PhaseDeJeu.PLANIFICATION;
+        }
+
+    }
+
+    private void ajouterJoueur(String nom, Color couleur, Position position, int indexWagon) {
+        joueurs.add(new Joueur(nom, couleur, position, joueurs.size()));
+        train.getWagons()[indexWagon].ajouterBandit(joueurs.getLast());
+
     }
 
     public Train getTrain() {
         return train;
     }
 
-    public Joueur getJoueur() {
-        return joueurCourant;
+    public Joueur getJoueurCourant() {
+        if(indexJoueurCourant == -1){
+            return null;
+        }
+        return joueurs.get(indexJoueurCourant);
+    }
+    public Personne getJoueurCourantOuMarshall() {
+        if(indexJoueurCourant == -1){
+            return marshall;
+        }
+        return joueurs.get(indexJoueurCourant);
     }
 
     public Marshall getMarshall() {
         return marshall;
     }
 
-    public Joueur[] getJoueurs() {
+    public List<Joueur> getJoueurs() {
         return joueurs;
     }
 
@@ -82,21 +97,31 @@ public class Jeu extends Observable {
 
 
     public void executerActions() {
-
-        for (int i = 0; i < NB_ACTIONS; i++) {
-            joueurCourant.executerActions(i);
-            setChanged();
-            notifyObservers();
-            attendre(1000);
+        for (indexAction = 0; indexAction < NB_ACTIONS; indexAction++) {
+            for (int j = 0; j < joueurs.size(); j++) {
+                setJoueurCourant(j);
+                getJoueurCourant().executerActions(indexAction);
+                setChanged();
+                notifyObservers();
+                attendre(2000);
+            }
+            setJoueurCourant(-1);
+            marshall.effectuerAction();
+            attendre(2000);
         }
-        attendre(1000);
-        joueurCourant.clearActions();
+        indexJoueurCourant = 0;
+
+        attendre(2000);
+        for (Joueur joueur : joueurs) {
+            joueur.clearActions();
+        }
+
     }
 
 
     private void attendre(long millis) {
         try {
-            Thread.sleep(millis);
+            Thread.sleep((long) (millis/VITESSE));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -104,5 +129,12 @@ public class Jeu extends Observable {
 
     public PhaseDeJeu getPhaseDeJeu() {
         return phaseDeJeu;
+    }
+
+    private void setJoueurCourant(int index){
+        indexJoueurCourant = index;
+        setChanged();
+        notifyObservers();
+        attendre(2000);
     }
 }

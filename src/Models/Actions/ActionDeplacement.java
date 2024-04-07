@@ -8,16 +8,11 @@ public class ActionDeplacement extends Action {
 
 
     private Direction direction;
-    public ActionDeplacement(Bandit bandit, Direction direction) {
-        super(bandit);
+    public ActionDeplacement(Direction direction) {
         this.direction = direction;
     }
 
-    public void executerAction(){
-        if(!peutExecuter()){
-            return;
-        }
-
+    public boolean executerAction(Bandit bandit){
 
         switch (direction){
             case AVANT:
@@ -43,9 +38,10 @@ public class ActionDeplacement extends Action {
 
 
         System.out.println( bandit + ": Je me déplace vers " + direction);
+        return true;
     }
 
-    public boolean peutExecuter(){
+    public boolean peutExecuter(Bandit bandit){
         if(bandit.getWagon().isLocomotive() && direction == Direction.AVANT) {
             System.out.println( bandit + " est déjà dans la locomotive");
             return false;

@@ -6,16 +6,16 @@ public class ButtonAction extends Button{
 
 
     public ButtonAction(Vue vue) {
-        super(vue, "Action");
+        super(vue, "Action !");
     }
 
     @Override
     public void effectuerAction() {
-        jeu.executerActions();
+        jeu.tourSuivant();
     }
 
     @Override
     public boolean peutExecuter() {
-        return jeu.getJoueur().actionsRemplies();
+        return jeu.getJoueurCourant().actionsRemplies();
     }
 }

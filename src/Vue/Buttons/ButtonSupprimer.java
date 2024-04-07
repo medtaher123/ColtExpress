@@ -4,16 +4,17 @@ import Vue.Vue;
 
 public class ButtonSupprimer extends Button{
     public ButtonSupprimer(Vue vue) {
-        super(vue, "␈");
+        super(vue,  "⌫");
     }
 
     @Override
     public void effectuerAction() {
-        jeu.getJoueur().popAction();
+        if(!peutExecuter()) return;
+        jeu.getJoueurCourant().popAction();
     }
 
     @Override
     public boolean peutExecuter() {
-        return !jeu.getJoueur().getActions().isEmpty();
+        return !jeu.getJoueurCourant().getActions().isEmpty();
     }
 }

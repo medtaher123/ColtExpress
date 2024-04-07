@@ -2,6 +2,8 @@ package Vue;
 
 import Controllers.Jeu;
 import Controllers.Joueur;
+import Enums.EtatAction;
+import Enums.PhaseDeJeu;
 import Models.*;
 import Models.Actions.*;
 import Models.Actions.Action;
@@ -20,8 +22,11 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+
+import static Controllers.Jeu.NB_ACTIONS;
 
 public class Vue extends JFrame implements Observer {
 
@@ -37,26 +42,27 @@ public class Vue extends JFrame implements Observer {
 
     private Jeu jeu;
     private Train train;
-    private Bandit joueur;
     private JPanel panel;
 
     private boolean buttonsEnabled = true;
 
     private ButtonActionBandit btnHaut;
-    private ButtonActionBandit btnTirer;
     private ButtonActionBandit btnArriere;
     private ButtonActionBandit btnBas;
     private ButtonActionBandit btnAvant;
     private ButtonActionBandit btnRecuperer;
     private ButtonSupprimer btnSupprimer;
     private ButtonAction btnAction;
+    private ButtonActionBandit btnTirerHaut;
+    private ButtonActionBandit btnTirerBas;
+    private ButtonActionBandit btnTirerAvant;
+    private ButtonActionBandit btnTirerArriere;
     private Button[] buttons;
 
     public Vue(Jeu jeu) {
         this.jeu = jeu;
         this.train = jeu.getTrain();
         jeu.addObserver(this);
-        joueur = jeu.getJoueur();
         try {
             this.backgroundImage = ImageIO.read(new File(BACKGROUND_IMAGE_PATH));
         } catch (IOException e) {
@@ -93,40 +99,63 @@ public class Vue extends JFrame implements Observer {
         add(creerPanneauDeControle(), BorderLayout.SOUTH);
 
 
-        setupKeyboardListeners();
+        //setupKeyboardListeners();
         this.setFocusable(true);
     }
 
     private void drawActions(Graphics g) {
-        int y = getHeight() - 100;
-        int x = 10;
+        int y = getHeight() - 100 - 20 * jeu.getJoueurs().size();
+        int x;
         int spacing = 30;
 
         Font originalFont = g.getFont();
-        Font newFont = new Font("Arial Unicode MS", Font.BOLD, 14); // Change "Arial Unicode MS" to the name of a font that supports the characters
+        Font newFont = new Font("Arial Unicode MS", Font.BOLD, 14);
 
-        g.drawString("Actions: ", x, y);
-        x += 70;
-        g.setFont(newFont);
-        for (ActionAvecEtat action : jeu.getJoueur().getActions()) {
+        for (Joueur joueur : jeu.getJoueurs()) {
+            y+= 20;
+            x = 10;
+            g.setColor(joueur.getCouleur());
+            g.drawString(joueur.getNom() + ": ", x, y);
+            g.setColor(Color.BLACK);
+            x += 30 + g.getFontMetrics().stringWidth(joueur.getNom());
+            g.setFont(newFont);
+            List<ActionAvecEtat> actions = joueur.getActions();
+            for (ActionAvecEtat action : actions) {
+                String text = "X";
+                if ((joueur == jeu.getJoueurCourant() && jeu.getPhaseDeJeu() == PhaseDeJeu.PLANIFICATION) || (jeu.getPhaseDeJeu() == PhaseDeJeu.EXECUTION && action.getEtat() != EtatAction.EN_ATTENTE)) {
+                    text = action.toString();
 
-            switch (action.getEtat()) {
-                case EN_ATTENTE:
-                    g.setColor(Color.BLACK);
-                    break;
-                case EXECUTEE:
-                    g.setColor(Color.GREEN);
-                    break;
-                case ECHOUEE:
-                    g.setColor(Color.RED);
-                    break;
+                    switch (action.getEtat()) {
+                        case EN_ATTENTE:
+                            g.setColor(Color.BLACK);
+                            break;
+                        case EXECUTEE:
+                            g.setColor(Color.GREEN);
+                            break;
+                        case ECHOUEE:
+                            g.setColor(Color.RED);
+                            break;
+                    }
+                }
+
+
+                g.drawString(text, x, y);
+                x += spacing + g.getFontMetrics().stringWidth("collecter");
+                //x += spacing + g.getFontMetrics().stringWidth(text);
+                g.setColor(Color.BLACK);
             }
+            g.setFont(originalFont);
 
-            g.drawString(action.toString(), x, y);
-            x += spacing + g.getFontMetrics().stringWidth(action.toString());
         }
 
-        g.setFont(originalFont); // Reset to the original font
+        if(jeu.getPhaseDeJeu() == PhaseDeJeu.PLANIFICATION) {
+            String actionsInfo = jeu.getJoueurCourant().getActions().size() + " / " + NB_ACTIONS;
+            if(jeu.getJoueurCourant().getActions().size() == NB_ACTIONS) {
+                g.setColor(Color.GREEN);
+            }
+            g.drawString(actionsInfo, getWidth() - g.getFontMetrics().stringWidth(actionsInfo) - 30, y);
+        }
+
     }
 
     private void drawTrain(Graphics g) {
@@ -138,7 +167,6 @@ public class Vue extends JFrame implements Observer {
             g.drawRect(i * (WAGON_WIDTH + WAGON_SPACING) + WAGON_SPACING, 100, WAGON_WIDTH, WAGON_HEIGHT);
             drawBanditsAndButins(g, wagon, i * (WAGON_WIDTH + WAGON_SPACING) + WAGON_SPACING + TEXT_OFFSET, 100);
 
-
             int wheelRadius = 10;
             int wheelY = 100 + WAGON_HEIGHT - wheelRadius;
 
@@ -148,6 +176,10 @@ public class Vue extends JFrame implements Observer {
 
             drawBanditsAndButins(g, wagon, i * (WAGON_WIDTH + WAGON_SPACING) + WAGON_SPACING + TEXT_OFFSET, 100);
 
+            if (i < train.getWagons().length - 1) {
+                g.setColor(Color.GRAY);
+                g.fillRect((i + 1) * (WAGON_WIDTH + WAGON_SPACING), 120 + WAGON_HEIGHT / 2, WAGON_SPACING, 5);
+            }
         }
     }
 
@@ -188,50 +220,49 @@ public class Vue extends JFrame implements Observer {
 
     private JPanel creerPanneauDeControle() {
 
-        btnHaut = new ButtonActionBandit(new ActionDeplacement(joueur, Direction.HAUT),this);
-        btnTirer = new ButtonActionBandit(new ActionTirer(joueur),this);
-        btnArriere = new ButtonActionBandit(new ActionDeplacement(joueur, Direction.ARRIERE),this);
-        btnBas = new ButtonActionBandit(new ActionDeplacement(joueur, Direction.BAS),  this);
-        btnAvant = new ButtonActionBandit(new ActionDeplacement(joueur, Direction.AVANT), this);
-        btnRecuperer = new ButtonActionBandit(new ActionCollecter(joueur), this);
+        btnHaut = new ButtonActionBandit(new ActionDeplacement(Direction.HAUT),this);
+        btnArriere = new ButtonActionBandit(new ActionDeplacement( Direction.ARRIERE),this);
+        btnBas = new ButtonActionBandit(new ActionDeplacement( Direction.BAS),  this);
+        btnAvant = new ButtonActionBandit(new ActionDeplacement( Direction.AVANT), this);
+        btnRecuperer = new ButtonActionBandit(new ActionCollecter(), this);
         btnSupprimer = new ButtonSupprimer(this);
         btnAction = new ButtonAction(this);
+        btnTirerAvant = new ButtonActionBandit(new ActionTirerAvant(), this);
+        btnTirerArriere = new ButtonActionBandit(new ActionTirerArriere(), this);
+        btnTirerHaut = new ButtonActionBandit(new ActionTirerHaut(), this);
+        btnTirerBas = new ButtonActionBandit(new ActionTirerBas(), this);
 
-        buttons = new Button[]{btnHaut, btnTirer, btnArriere, btnBas, btnAvant, btnRecuperer, btnSupprimer, btnAction};
+
+
+        buttons = new Button[]{btnHaut, btnArriere, btnBas, btnAvant, btnRecuperer, btnSupprimer, btnAction, btnTirerAvant, btnTirerArriere, btnTirerHaut, btnTirerBas};
 
         JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new GridLayout(2, 6));
+        controlPanel.setLayout(new GridLayout(2, 7));
 
 
         controlPanel.add(new JLabel());
         controlPanel.add(btnHaut.getJButton());
         controlPanel.add(new JLabel());
         controlPanel.add(new JLabel());
-        controlPanel.add(btnTirer.getJButton());
+        controlPanel.add(new JLabel());
+        controlPanel.add(btnTirerHaut.getJButton());
+        //controlPanel.add(new JLabel());
+        controlPanel.add(btnRecuperer.getJButton());
         controlPanel.add(btnSupprimer.getJButton());
 
         controlPanel.add(btnArriere.getJButton());
         controlPanel.add(btnBas.getJButton());
         controlPanel.add(btnAvant.getJButton());
         controlPanel.add(new JLabel());
-        controlPanel.add(btnRecuperer.getJButton());
+        controlPanel.add(btnTirerArriere.getJButton());
+        controlPanel.add(btnTirerBas.getJButton());
+        controlPanel.add(btnTirerAvant.getJButton());
+        //controlPanel.add(new JLabel());
         controlPanel.add(btnAction.getJButton());
 
-        return controlPanel;
-    }
+        refreshButtons();
 
-    public JButton creerJButton(Action action){
-        JButton btn = new JButton(action.toString());
-        btn.addActionListener(e -> {
-            if(!action.peutExecuter()){
-                return;
-            }
-            action.executer();
-            panel.repaint();
-            jeu.tourSuivant();
-            panel.repaint();
-        });
-        return btn;
+        return controlPanel;
     }
 
     private void refreshButtons() {
@@ -248,7 +279,7 @@ public class Vue extends JFrame implements Observer {
         buttonsEnabled = enabled;
         refreshButtons();
     }
-    private void setupKeyboardListeners() {
+    /*private void setupKeyboardListeners() {
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -275,7 +306,7 @@ public class Vue extends JFrame implements Observer {
                 panel.repaint();
             }
         });
-    }
+    }*/
 
 
     private void drawScore(Graphics g) {
@@ -283,21 +314,25 @@ public class Vue extends JFrame implements Observer {
         g.setFont(new Font("Arial", Font.BOLD, 14));
         int y = 30;
         for (Joueur joueur : jeu.getJoueurs()) {
-            g.drawString(joueur.getNom() + ": " + joueur.getScore(), 10, y);
+            g.setColor(joueur.getCouleur());
+            String bullets = "|".repeat(joueur.getNbBalles());
+            g.drawString(joueur.getNom() + ": $ " + joueur.getScore() + ", Balles: " + bullets, 10, y);
             y += 20;
         }
+        g.setColor(Color.BLACK);
 
 
-        // Ajouter le nom du joueur courant et la phase du jeu en haut à droite
-        String joueurCourant = "Joueur courant: " + jeu.getJoueur().getNom();
-        String phaseDuJeu = "Phase: " + jeu.getPhaseDeJeu().toString();
+        String joueurCourant = jeu.getJoueurCourantOuMarshall().getNom();
+        String phaseDuJeu = jeu.getPhaseDeJeu().toString();
 
-        // Calculer les positions x pour que le texte soit aligné à droite
+
         int xPhaseDuJeu = this.getWidth() - g.getFontMetrics().stringWidth(phaseDuJeu) - 50;
-        int xJoueurCourant = this.getWidth() - g.getFontMetrics().stringWidth(joueurCourant) - 50;
-        
+        int xJoueurCourant = this.getWidth() / 2 - g.getFontMetrics().stringWidth(joueurCourant) / 2;
+
         g.drawString(phaseDuJeu, xPhaseDuJeu, 30);
-        g.drawString(joueurCourant, xJoueurCourant, 50);
+        g.setColor(jeu.getJoueurCourantOuMarshall().getCouleur());
+        g.drawString(joueurCourant, xJoueurCourant, 30);
+        g.setColor(Color.BLACK);
     }
 
     @Override

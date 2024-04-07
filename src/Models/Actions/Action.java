@@ -4,24 +4,21 @@ import Models.Bandit;
 
 public abstract class Action {
 
-    protected Bandit bandit;
 
-    public Action(Bandit bandit){
-        this.bandit = bandit;
-    }
 
-    public boolean executer(){
-        if(peutExecuter()){
-            executerAction();
-            return true;
+
+    public final boolean executer(Bandit bandit){
+        if(peutExecuter(bandit)){
+            return executerAction(bandit);
         }
         return false;
     }
 
-    protected abstract void executerAction();
+    protected abstract boolean executerAction(Bandit bandit);
 
-    public abstract boolean peutExecuter();
+    public abstract boolean peutExecuter(Bandit bandit);
 
     public abstract String toString();
+
 
 }

@@ -6,25 +6,16 @@ import Models.Bandit;
 public class ActionCollecter extends Action {
 
 
-    public ActionCollecter(Bandit bandit) {
-        super(bandit);
-    }
-
     @Override
-    public void executerAction() {
-        if (!peutExecuter()) {
-            return;
-        }
-
+    public boolean executerAction(Bandit bandit) {
 
         System.out.println(bandit.getNom() + " collecte!");
-
-        // collecter un element au hazard dans le wagon
         bandit.getWagon().collecterButin(bandit);
+        return true;
     }
 
     @Override
-    public boolean peutExecuter() {
+    public boolean peutExecuter(Bandit bandit) {
 
         if (bandit.getWagon().getButins().isEmpty()) {
             System.out.println("Il n'y a plus de butin à collecter");

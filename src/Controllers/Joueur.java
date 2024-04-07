@@ -13,15 +13,17 @@ import static Controllers.Jeu.NB_ACTIONS;
 
 public class Joueur extends Bandit {
     private final List<ActionAvecEtat> actions = new ArrayList<>(NB_ACTIONS);
+    private final int index;
 
-    public Joueur(String nom, Color couleur, Position position) {
+    public Joueur(String nom, Color couleur, Position position, int index) {
         super(nom, couleur, position);
+        this.index = index;
     }
 
 
     public void addAction(Action action) {
         if(actions.size() < NB_ACTIONS) {
-            actions.add(new ActionAvecEtat(action));
+            actions.add(new ActionAvecEtat(action, this));
         }
     }
 

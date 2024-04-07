@@ -14,7 +14,7 @@ public class Bandit extends Personne{
 
     private List<Butin> butins = new ArrayList<Butin>();
 
-
+    private int nbBalles = 6;
 
 
     public Bandit(String nom, Color couleur, Position position){
@@ -87,14 +87,31 @@ public class Bandit extends Personne{
 
     }
 
-    public void seFaitTirerDessus() {
+    public void seFaitTirerDessus(Personne tireur){
         // deposer un butin au hazard
         if(!butins.isEmpty()) {
             Butin butin = butins.get((int) (Math.random() * butins.size()));
             deposerButin(butin);
         }
-        seDeplacer(Direction.HAUT);
+        if(tireur instanceof Marshall){
+            seDeplacer(Direction.HAUT);
+        }
+        System.out.println(nom + " se fait tirer dessus par " + tireur.getNom());
 
+    }
 
+    public int getNbBalles() {
+        return nbBalles;
+    }
+    public void tirer(){
+        if(nbBalles == 0){
+            System.out.println(nom + " n'a plus de balles");
+            return;
+        }
+        nbBalles--;
+    }
+
+    public void setNbBalles(int i) {
+        nbBalles = i;
     }
 }
