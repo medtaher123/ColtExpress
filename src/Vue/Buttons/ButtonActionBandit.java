@@ -9,8 +9,8 @@ public class ButtonActionBandit extends Button{
 
     private Action action;
 
-    public ButtonActionBandit(Action action, Vue vue) {
-        super(vue, action.toString());
+    public ButtonActionBandit(Action action, Vue vue, int keyCode) {
+        super(vue, action.toString(), keyCode);
         this.action = action;
     }
 

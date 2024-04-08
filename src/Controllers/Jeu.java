@@ -1,11 +1,8 @@
 package Controllers;
 
 import Enums.PhaseDeJeu;
-import Enums.Position;
 import Models.*;
-import Models.Butin.Bijous;
-import Models.Butin.Bourse;
-import Models.Butin.Butin;
+import Vue.Vue;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -14,58 +11,77 @@ import java.util.Observable;
 
 public class Jeu extends Observable {
 
-    public static final float VITESSE = 2;
-    public static final String NOM_BANDIT_1 = "Bandit 1";
-    public static final int NB_ACTIONS = 5;
+    private float vitesseAnimation = 1;
+    public static int nbActions = 5;
 
     private List<Joueur> joueurs = new ArrayList<>();
     private int indexJoueurCourant = 0;
     private Train train;
     private Marshall marshall;
-    public static final int NB_WAGONS = 5;
 
     private int indexAction = 0;
 
     private PhaseDeJeu phaseDeJeu = PhaseDeJeu.PLANIFICATION;
 
 
-
-    public void startGame() {
-        train = new Train(NB_WAGONS);
-
-        ajouterJoueur(NOM_BANDIT_1, new Color(13, 13, 104), Position.TOIT,3);
-        ajouterJoueur("Bandit 2", new Color(255, 0, 0), Position.INTERIEUR,4);
-
+    public Jeu(int nbWagons){
+        train = new Train(nbWagons);
         marshall = new Marshall();
         train.getWagons()[0].setMarshall(marshall);
 
+    }
 
+    public void startGame() {
+
+        Vue ex = new Vue(this);
+        ex.setVisible(true);
+
+        if(getJoueurCourant() instanceof Bot){
+            ((Bot)getJoueurCourant()).choisirActions();
+            tourSuivant();
+        }
     }
 
 
     public void tourSuivant() {
 
-        // rend le joueur suivant dans le tableau de joueurs le joueur courant
         if(phaseDeJeu == PhaseDeJeu.PLANIFICATION) {
-            if (indexJoueurCourant != joueurs.size() - 1) {
+            if (indexJoueurCourant < joueurs.size() - 1) {
                 setJoueurCourant(indexJoueurCourant + 1);
+                if(getJoueurCourant() instanceof Bot){
+                    ((Bot)getJoueurCourant()).choisirActions();
+                    tourSuivant();
+                }
                 return;
             }
-            setJoueurCourant(0);
             phaseDeJeu = PhaseDeJeu.EXECUTION;
+            setJoueurCourant(0);
         }
 
         if(phaseDeJeu == PhaseDeJeu.EXECUTION) {
             executerActions();
             phaseDeJeu = PhaseDeJeu.PLANIFICATION;
+            indexJoueurCourant = 0;
+            attendre(2000);
+            if(getJoueurCourant() instanceof Bot){
+                ((Bot)getJoueurCourant()).choisirActions();
+                tourSuivant();
+            }
         }
 
     }
 
-    private void ajouterJoueur(String nom, Color couleur, Position position, int indexWagon) {
-        joueurs.add(new Joueur(nom, couleur, position, joueurs.size()));
+    public void ajouterJoueur(String nom, Color couleur,int nbBalles ,boolean estBot) {
+        Joueur joueur;
+        if(estBot){
+            joueur = new Bot(nom, couleur,this);
+        } else {
+            joueur = new Joueur(nom, couleur);
+        }
+        joueur.setNbBalles(nbBalles);
+        joueurs.add(joueur);
+        int indexWagon = (int) (Math.random() * (train.getWagons().length - 1)) + 1;
         train.getWagons()[indexWagon].ajouterBandit(joueurs.getLast());
-
     }
 
     public Train getTrain() {
@@ -97,7 +113,7 @@ public class Jeu extends Observable {
 
 
     public void executerActions() {
-        for (indexAction = 0; indexAction < NB_ACTIONS; indexAction++) {
+        for (indexAction = 0; indexAction < nbActions; indexAction++) {
             for (int j = 0; j < joueurs.size(); j++) {
                 setJoueurCourant(j);
                 getJoueurCourant().executerActions(indexAction);
@@ -107,11 +123,10 @@ public class Jeu extends Observable {
             }
             setJoueurCourant(-1);
             marshall.effectuerAction();
+            setChanged();
+            notifyObservers();
             attendre(2000);
         }
-        indexJoueurCourant = 0;
-
-        attendre(2000);
         for (Joueur joueur : joueurs) {
             joueur.clearActions();
         }
@@ -121,7 +136,7 @@ public class Jeu extends Observable {
 
     private void attendre(long millis) {
         try {
-            Thread.sleep((long) (millis/VITESSE));
+            Thread.sleep((long) (millis/ vitesseAnimation));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -136,5 +151,17 @@ public class Jeu extends Observable {
         setChanged();
         notifyObservers();
         attendre(2000);
+    }
+
+    public void setVitesseAnimation(float vitesseAnimation) {
+        this.vitesseAnimation = vitesseAnimation;
+    }
+
+    public void setNbActions(int value) {
+        nbActions = value;
+    }
+
+    public int getNbActions() {
+        return nbActions;
     }
 }

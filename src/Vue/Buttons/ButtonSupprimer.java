@@ -2,9 +2,11 @@ package Vue.Buttons;
 
 import Vue.Vue;
 
+import java.awt.event.KeyEvent;
+
 public class ButtonSupprimer extends Button{
     public ButtonSupprimer(Vue vue) {
-        super(vue,  "⌫");
+        super(vue,  "⌫", KeyEvent.VK_BACK_SPACE);
     }
 
     @Override

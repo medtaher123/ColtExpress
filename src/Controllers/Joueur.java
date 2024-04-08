@@ -9,26 +9,27 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static Controllers.Jeu.NB_ACTIONS;
+import static Controllers.Jeu.nbActions;
 
 public class Joueur extends Bandit {
-    private final List<ActionAvecEtat> actions = new ArrayList<>(NB_ACTIONS);
-    private final int index;
+    private final List<ActionAvecEtat> actions = new ArrayList<>(nbActions);
 
-    public Joueur(String nom, Color couleur, Position position, int index) {
+    public Joueur(String nom, Color couleur, Position position) {
         super(nom, couleur, position);
-        this.index = index;
+    }
+    public Joueur(String nom, Color couleur){
+        super(nom, couleur, Position.values()[(int)(Math.random() * Position.values().length)]);
     }
 
 
     public void addAction(Action action) {
-        if(actions.size() < NB_ACTIONS) {
+        if(actions.size() < nbActions) {
             actions.add(new ActionAvecEtat(action, this));
         }
     }
 
     public boolean peutAjouterAction() {
-        return actions.size() < NB_ACTIONS;
+        return actions.size() < nbActions;
     }
     public void popAction() {
         actions.removeLast();
@@ -44,8 +45,7 @@ public class Joueur extends Bandit {
         actions.get(index).executer();
     }
     public boolean actionsRemplies() {
-        return actions.size() == NB_ACTIONS;
+        return actions.size() == nbActions;
     }
-
 
 }

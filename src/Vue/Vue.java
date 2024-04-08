@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import static Controllers.Jeu.NB_ACTIONS;
+import static Controllers.Jeu.nbActions;
 
 public class Vue extends JFrame implements Observer {
 
@@ -59,6 +59,7 @@ public class Vue extends JFrame implements Observer {
     private ButtonActionBandit btnTirerArriere;
     private Button[] buttons;
 
+    private int MaxLongueurNomJoueur;
     public Vue(Jeu jeu) {
         this.jeu = jeu;
         this.train = jeu.getTrain();
@@ -77,6 +78,7 @@ public class Vue extends JFrame implements Observer {
         setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        calculerMaxLongueurNomJoueur();
 
         panel = new JPanel() {
             @Override
@@ -103,6 +105,14 @@ public class Vue extends JFrame implements Observer {
         this.setFocusable(true);
     }
 
+    private void calculerMaxLongueurNomJoueur() {
+        for (Joueur joueur : jeu.getJoueurs()) {
+            if(joueur.getNom().length() > MaxLongueurNomJoueur) {
+                MaxLongueurNomJoueur = joueur.getNom().length();
+            }
+        }
+    }
+
     private void drawActions(Graphics g) {
         int y = getHeight() - 100 - 20 * jeu.getJoueurs().size();
         int x;
@@ -117,7 +127,7 @@ public class Vue extends JFrame implements Observer {
             g.setColor(joueur.getCouleur());
             g.drawString(joueur.getNom() + ": ", x, y);
             g.setColor(Color.BLACK);
-            x += 30 + g.getFontMetrics().stringWidth(joueur.getNom());
+            x += 30 + g.getFontMetrics().stringWidth("a")*MaxLongueurNomJoueur;
             g.setFont(newFont);
             List<ActionAvecEtat> actions = joueur.getActions();
             for (ActionAvecEtat action : actions) {
@@ -149,8 +159,8 @@ public class Vue extends JFrame implements Observer {
         }
 
         if(jeu.getPhaseDeJeu() == PhaseDeJeu.PLANIFICATION) {
-            String actionsInfo = jeu.getJoueurCourant().getActions().size() + " / " + NB_ACTIONS;
-            if(jeu.getJoueurCourant().getActions().size() == NB_ACTIONS) {
+            String actionsInfo = jeu.getJoueurCourant().getActions().size() + " / " + nbActions;
+            if(jeu.getJoueurCourant().getActions().size() == nbActions) {
                 g.setColor(Color.GREEN);
             }
             g.drawString(actionsInfo, getWidth() - g.getFontMetrics().stringWidth(actionsInfo) - 30, y);
@@ -220,17 +230,17 @@ public class Vue extends JFrame implements Observer {
 
     private JPanel creerPanneauDeControle() {
 
-        btnHaut = new ButtonActionBandit(new ActionDeplacement(Direction.HAUT),this);
-        btnArriere = new ButtonActionBandit(new ActionDeplacement( Direction.ARRIERE),this);
-        btnBas = new ButtonActionBandit(new ActionDeplacement( Direction.BAS),  this);
-        btnAvant = new ButtonActionBandit(new ActionDeplacement( Direction.AVANT), this);
-        btnRecuperer = new ButtonActionBandit(new ActionCollecter(), this);
+        btnHaut = new ButtonActionBandit(new ActionDeplacement(Direction.HAUT),this, KeyEvent.VK_UP);
+        btnArriere = new ButtonActionBandit(new ActionDeplacement( Direction.ARRIERE),this, KeyEvent.VK_LEFT);
+        btnBas = new ButtonActionBandit(new ActionDeplacement( Direction.BAS),  this, KeyEvent.VK_DOWN);
+        btnAvant = new ButtonActionBandit(new ActionDeplacement( Direction.AVANT), this, KeyEvent.VK_RIGHT);
+        btnRecuperer = new ButtonActionBandit(new ActionCollecter(), this, KeyEvent.VK_SPACE);
         btnSupprimer = new ButtonSupprimer(this);
         btnAction = new ButtonAction(this);
-        btnTirerAvant = new ButtonActionBandit(new ActionTirerAvant(), this);
-        btnTirerArriere = new ButtonActionBandit(new ActionTirerArriere(), this);
-        btnTirerHaut = new ButtonActionBandit(new ActionTirerHaut(), this);
-        btnTirerBas = new ButtonActionBandit(new ActionTirerBas(), this);
+        btnTirerAvant = new ButtonActionBandit(new ActionTirerAvant(), this, KeyEvent.VK_D);
+        btnTirerArriere = new ButtonActionBandit(new ActionTirerArriere(), this, KeyEvent.VK_Q);
+        btnTirerHaut = new ButtonActionBandit(new ActionTirerHaut(), this, KeyEvent.VK_Z);
+        btnTirerBas = new ButtonActionBandit(new ActionTirerBas(), this, KeyEvent.VK_S);
 
 
 
@@ -279,35 +289,6 @@ public class Vue extends JFrame implements Observer {
         buttonsEnabled = enabled;
         refreshButtons();
     }
-    /*private void setupKeyboardListeners() {
-        this.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP:
-                        joueur.seDeplacer(Direction.HAUT);
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        joueur.seDeplacer(Direction.BAS);
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        joueur.seDeplacer(Direction.ARRIERE);
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        joueur.seDeplacer(Direction.AVANT);
-                        break;
-                    case KeyEvent.VK_T:
-                        // Code
-                        break;
-                    case KeyEvent.VK_R:
-                        // Code
-                        break;
-                }
-                panel.repaint();
-            }
-        });
-    }*/
-
 
     private void drawScore(Graphics g) {
         g.setColor(Color.BLACK);

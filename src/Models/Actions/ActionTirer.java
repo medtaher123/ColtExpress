@@ -29,11 +29,8 @@ public abstract class ActionTirer extends Action {
     }
 
     protected boolean executerAction(Bandit bandit) {
-        if (tirer(bandit)) {
-            bandit.setNbBalles(bandit.getNbBalles() - 1);
-            return true;
-        }
-        return false;
+        bandit.setNbBalles(bandit.getNbBalles() - 1);
+        return tirer(bandit);
     }
 
     protected abstract boolean tirer(Bandit bandit);

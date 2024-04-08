@@ -16,7 +16,7 @@ public class DeplacementBanditTest {
 
     @BeforeEach
     public void setUp() {
-        jeu = new Jeu();
+        jeu = new Jeu(5);
         jeu.startGame();
         bandit = jeu.getJoueurCourant();
     }

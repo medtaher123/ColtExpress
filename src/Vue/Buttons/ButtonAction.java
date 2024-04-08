@@ -2,11 +2,13 @@ package Vue.Buttons;
 
 import Vue.Vue;
 
+import java.awt.event.KeyEvent;
+
 public class ButtonAction extends Button{
 
 
     public ButtonAction(Vue vue) {
-        super(vue, "Action !");
+        super(vue, "Action !", KeyEvent.VK_ENTER);
     }
 
     @Override
